@@ -6,9 +6,9 @@
 
 using namespace std;
 
-typedef vector<string> strvec_t; 
+typedef vector<string> strvec_t;
 
-strvec_t keywords { "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"};
+const strvec_t keywords { "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"};
 
 strvec_t var_names, function_names;
 
@@ -19,6 +19,12 @@ void lexicalAnalysis(vector<string> &lines);
 void sytacticAnalysis(vector<string> &lines);
 void semanticAnalysis(vector<string> &lines);
 
+/**
+ * The function `createVector` takes a vector of strings as an argument and fills it with the lines of
+ * a text file
+ * 
+ * @return The vector is being returned.
+ */
 int main(void) {
     
     vector<string> Lines;
@@ -29,6 +35,11 @@ int main(void) {
     return 0;
 }
 
+/**
+ * It opens a file, reads it line by line, and stores each line in a vector
+ * 
+ * @param lines vector of strings
+ */
 void createVector(vector<string> &lines) {
     ifstream file;
     string buffer; 
@@ -47,6 +58,11 @@ void createVector(vector<string> &lines) {
 
 }
 
+/**
+ * This function takes a vector of strings and prints each string in the vector on a new line
+ * 
+ * @param lines a vector of strings that contains the lines of the file
+ */
 void printVector(vector<string> &lines) {
     int i = 0;
     for (i; i < lines.size(); i++) {
