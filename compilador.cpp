@@ -17,6 +17,8 @@
 
 using namespace std;
 
+const regex regex_comment("(.*)#(.*)");
+
 typedef vector<string> strvec_t;
 
 const strvec_t keywords { "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"};
@@ -63,7 +65,14 @@ void createVector(vector<string> &lines) {
     }
 
     while (!file.eof()) {
+        
         getline(file, buffer);
+
+        if (regex_match(buffer, regex_comment)) {
+            stringstream input_stringstream(buffer);
+            getline(input_stringstream, buffer, '#');
+        } 
+
         lines.push_back(buffer);
     }
 
@@ -75,10 +84,9 @@ void createVector(vector<string> &lines) {
  * @param lines a vector of strings that contains the lines of the file
  */
 void printVector(vector<string> &lines) {
-    int i = 0;
-    for (i; i < lines.size(); i++) {
-        cout << lines[i] << endl;
-    }  
+    int i;
+    for (i = 0; i < lines.size(); i++)
+        cout << lines[i] << endl;  
 }
 
 void lexicalAnalysis(vector<string> &lines) {
