@@ -1,3 +1,14 @@
+/**
+ * @file compilador.cpp
+ * @author Ricardo Uriel Mora Campos (rurimoca@gmail.com)
+ * @brief Transpiler from Python code to C++ code.
+ * @version 0.1
+ * @date 2022-09-7
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -20,7 +31,7 @@ void sytacticAnalysis(vector<string> &lines);
 void semanticAnalysis(vector<string> &lines);
 
 /**
- * The function `createVector` takes a vector of strings as an argument and fills it with the lines of
+ * @brief The function `createVector` takes a vector of strings as an argument and fills it with the lines of
  * a text file
  * 
  * @return The vector is being returned.
@@ -36,7 +47,7 @@ int main(void) {
 }
 
 /**
- * It opens a file, reads it line by line, and stores each line in a vector
+ * @brief createVector Opens a file, reads it line by line, and stores each line in a vector
  * 
  * @param lines vector of strings
  */
@@ -59,8 +70,8 @@ void createVector(vector<string> &lines) {
 }
 
 /**
- * This function takes a vector of strings and prints each string in the vector on a new line
- * 
+ * @brief printVector Function takes a vector of strings and prints each string in the vector on a new line
+ *
  * @param lines a vector of strings that contains the lines of the file
  */
 void printVector(vector<string> &lines) {
