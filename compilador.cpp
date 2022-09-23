@@ -10,14 +10,18 @@
  */
 
 #include <iostream>
+#include <iterator>
+#include <algorithm>
 #include <fstream>
 #include <vector>
+#include <list>
 #include <string>
 #include <regex>
 
 using namespace std;
 
 const regex regex_comment("(.*)#(.*)");
+const regex regex_idents("[\\s]{4}(.*)");
 
 typedef vector<string> strvec_t;
 
@@ -29,7 +33,7 @@ void createVector(vector<string> &lines);
 void printVector(vector<string> &lines);
 
 void lexicalAnalysis(vector<string> &lines);
-void sytacticAnalysis(vector<string> &lines);
+void sytacticAnalysis(string lines);
 void semanticAnalysis(vector<string> &lines);
 
 /**
@@ -43,9 +47,20 @@ int main(void) {
     vector<string> Lines;
 
     createVector(Lines);
-    printVector(Lines);
+    // printVector(Lines);
+    lexicalAnalysis(Lines);
 
     return 0;
+}
+
+/**
+ * @brief printVector Function takes a vector of strings and prints each string in the vector on a new line
+ *
+ * @param lines a vector of strings that contains the lines of the file
+ */
+void printVector(vector<string> &lines) {
+    for (auto i = lines.cbegin(); i != lines.cend(); i++)
+        cout << *i << endl;  
 }
 
 /**
@@ -71,30 +86,33 @@ void createVector(vector<string> &lines) {
         if (regex_match(buffer, regex_comment)) {
             stringstream input_stringstream(buffer);
             getline(input_stringstream, buffer, '#');
-        } 
+        }
 
         lines.push_back(buffer);
     }
 
 }
 
-/**
- * @brief printVector Function takes a vector of strings and prints each string in the vector on a new line
- *
- * @param lines a vector of strings that contains the lines of the file
- */
-void printVector(vector<string> &lines) {
-    int i;
-    for (i = 0; i < lines.size(); i++)
-        cout << lines[i] << endl;  
-}
-
 void lexicalAnalysis(vector<string> &lines) {
 
+    for_each(lines.begin(), lines.end(), sytacticAnalysis);
+
+    // if (regex_match(buffer, regex_idents))
+    // {
+    //     buffer = "%" + buffer;
+    // }
+
 }
 
-void sytacticAnalysis(vector<string> &lines) {
+void sytacticAnalysis(string lines) {
+    // cout << std::regex_replace(lines, regex_idents, "%");
+    string result;
 
+    if (regex_match(lines, regex_idents)) {
+        regex_replace(inserter(lines, lines.begin()), lines.begin(), lines.end(), regex_idents, "%");
+    }
+
+    cout << lines << endl;
 }
 
 void semanticAnalysis(vector<string> &lines) {
