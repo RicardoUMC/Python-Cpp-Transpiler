@@ -33,8 +33,10 @@ void createVector(vector<string> &lines);
 void printVector(vector<string> &lines);
 
 void lexicalAnalysis(vector<string> &lines);
-void sytacticAnalysis(string lines);
+void syntacticAnalysis(vector<string> &lines);
 void semanticAnalysis(vector<string> &lines);
+
+void removeIdents(string &lines);
 
 /**
  * @brief The function `createVector` takes a vector of strings as an argument and fills it with the lines of
@@ -47,9 +49,9 @@ int main(void) {
     vector<string> Lines;
 
     createVector(Lines);
-    // printVector(Lines);
     lexicalAnalysis(Lines);
 
+    printVector(Lines);
     return 0;
 }
 
@@ -59,8 +61,10 @@ int main(void) {
  * @param lines a vector of strings that contains the lines of the file
  */
 void printVector(vector<string> &lines) {
+
     for (auto i = lines.cbegin(); i != lines.cend(); i++)
         cout << *i << endl;  
+
 }
 
 /**
@@ -95,26 +99,53 @@ void createVector(vector<string> &lines) {
 
 void lexicalAnalysis(vector<string> &lines) {
 
-    for_each(lines.begin(), lines.end(), sytacticAnalysis);
-
-    // if (regex_match(buffer, regex_idents))
-    // {
-    //     buffer = "%" + buffer;
-    // }
+    for_each(lines.begin(), lines.end(), removeIdents);
 
 }
 
-void sytacticAnalysis(string lines) {
-    // cout << std::regex_replace(lines, regex_idents, "%");
-    string result;
+void syntacticAnalysis(vector<string> &lines) {
 
-    if (regex_match(lines, regex_idents)) {
-        regex_replace(inserter(lines, lines.begin()), lines.begin(), lines.end(), regex_idents, "%");
-    }
-
-    cout << lines << endl;
 }
 
 void semanticAnalysis(vector<string> &lines) {
 
 }
+
+/**
+ * @brief removeIdents removes the identation of the code
+ *
+ * @param lines The string that will be modified.
+ */
+void removeIdents(string &lines) {
+    
+    int i; 
+    bool idents = false;
+
+    if (lines[0] == ' ' && lines[1] == ' ' && lines[2] == ' ' && lines[3] == ' ' ) {
+
+        idents = true;
+
+        string auxiliar = "";
+        for (int i = 4; i < lines.size(); i++) auxiliar += lines[i];
+
+        lines = auxiliar;
+
+        removeIdents(lines);
+    }
+    
+    if (idents) lines = "%" + lines;
+
+    /**
+     * PAST CODE (NOT IMPLEMENTED)
+     * 
+        // if (regex_match(lines, regex_idents)) {
+
+        //     // inserter(lines, lines.begin()) Helps to insert front.
+        //     regex_replace(inserter(lines, lines.begin()), lines.begin(), lines.end(), regex_idents, "%");
+
+        // }
+     *
+     */
+
+}
+
