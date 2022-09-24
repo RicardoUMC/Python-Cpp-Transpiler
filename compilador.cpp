@@ -4,9 +4,9 @@
  * @brief Transpiler from Python code to C++ code.
  * @version 0.1
  * @date 2022-09-7
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #include <iostream>
@@ -23,9 +23,19 @@ using namespace std;
 const regex regex_comment("(.*)#(.*)");
 const regex regex_idents("[\\s]{4}(.*)");
 
+struct node
+{
+    string nombre;
+    string telefono;
+    string correo;
+    node *sig;
+};
+
+typedef node *apu_nodo;
+
 typedef vector<string> strvec_t;
 
-const strvec_t keywords { "False", "None", "True", "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"};
+const strvec_t keywords{"False", "None", "True", "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"};
 
 strvec_t var_names, function_names;
 
@@ -41,11 +51,11 @@ void removeIdents(string &lines);
 /**
  * @brief The function `createVector` takes a vector of strings as an argument and fills it with the lines of
  * a text file
- * 
+ *
  * @return The vector is being returned.
  */
-int main(void) {
-    
+int main(void)
+{
     vector<string> Lines;
 
     createVector(Lines);
@@ -60,92 +70,81 @@ int main(void) {
  *
  * @param lines a vector of strings that contains the lines of the file
  */
-void printVector(vector<string> &lines) {
-
+void printVector(vector<string> &lines)
+{
     for (auto i = lines.cbegin(); i != lines.cend(); i++)
-        cout << *i << endl;  
-
+        cout << *i << endl;
 }
 
 /**
  * @brief createVector Opens a file, reads it line by line, and stores each line in a vector
- * 
+ *
  * @param lines vector of strings
  */
-void createVector(vector<string> &lines) {
+void createVector(vector<string> &lines)
+{
     ifstream file;
-    string buffer; 
+    string buffer;
 
     file.open("./ProyectoFinal.txt", ios::in);
 
-    if (file.fail()) {
+    if (file.fail())
+    {
         cout << "Error al abrir el fichero." << endl;
         exit(-1);
     }
 
-    while (!file.eof()) {
-        
+    while (!file.eof())
+    {
         getline(file, buffer);
 
-        if (regex_match(buffer, regex_comment)) {
+        if (regex_match(buffer, regex_comment))
+        {
             stringstream input_stringstream(buffer);
             getline(input_stringstream, buffer, '#');
         }
 
         lines.push_back(buffer);
     }
-
 }
 
-void lexicalAnalysis(vector<string> &lines) {
-
+void lexicalAnalysis(vector<string> &lines)
+{
     for_each(lines.begin(), lines.end(), removeIdents);
-
 }
 
-void syntacticAnalysis(vector<string> &lines) {
-
+void syntacticAnalysis(vector<string> &lines)
+{
 }
 
-void semanticAnalysis(vector<string> &lines) {
-
+void semanticAnalysis(vector<string> &lines)
+{
 }
 
 /**
- * @brief removeIdents removes the identation of the code
+ * @brief removeIdents removes the identation of the code recursively
  *
  * @param lines The string that will be modified.
  */
-void removeIdents(string &lines) {
-    
-    int i; 
+void removeIdents(string &lines)
+{
+
     bool idents = false;
 
-    if (lines[0] == ' ' && lines[1] == ' ' && lines[2] == ' ' && lines[3] == ' ' ) {
-
+    if (lines[0] == ' ' && lines[1] == ' ' && lines[2] == ' ' && lines[3] == ' ')
+    {
         idents = true;
 
+        int i;
         string auxiliar = "";
-        for (int i = 4; i < lines.size(); i++) auxiliar += lines[i];
+        for (i = 4; i < lines.size(); i++)
+            auxiliar += lines[i];
 
         lines = auxiliar;
 
         removeIdents(lines);
     }
-    
-    if (idents) lines = "%" + lines;
 
-    /**
-     * PAST CODE (NOT IMPLEMENTED)
-     * 
-        // if (regex_match(lines, regex_idents)) {
-
-        //     // inserter(lines, lines.begin()) Helps to insert front.
-        //     regex_replace(inserter(lines, lines.begin()), lines.begin(), lines.end(), regex_idents, "%");
-
-        // }
-     *
-     */
-
+    if (idents)
+        lines = "¬" + lines;
 }
-
