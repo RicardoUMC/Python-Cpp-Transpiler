@@ -22,16 +22,17 @@ using namespace std;
 
 const regex regex_comment("(.*)#(.*)");
 const regex regex_idents("[\\s]{4}(.*)");
+const regex regex_tabs("¬+(.*)");
 
 struct node
 {
-    string nombre;
-    string telefono;
-    string correo;
-    node *sig;
+    int line;
+    string token;
+    string type;
+    node *next;
 };
 
-typedef node *apu_nodo;
+typedef node *nodep_t;
 
 typedef vector<string> strvec_t;
 
@@ -47,6 +48,7 @@ void syntacticAnalysis(vector<string> &lines);
 void semanticAnalysis(vector<string> &lines);
 
 void removeIdents(string &lines);
+vector<node> generateTokens(string &lines);
 
 /**
  * @brief The function `createVector` takes a vector of strings as an argument and fills it with the lines of
@@ -61,7 +63,7 @@ int main(void)
     createVector(Lines);
     lexicalAnalysis(Lines);
 
-    printVector(Lines);
+    // printVector(Lines);
     return 0;
 }
 
@@ -111,6 +113,16 @@ void createVector(vector<string> &lines)
 void lexicalAnalysis(vector<string> &lines)
 {
     for_each(lines.begin(), lines.end(), removeIdents);
+
+    for_each(lines.begin(), lines.end(), generateTokens);
+
+    // for_each(lines.begin(), lines.end(), [&](string d) { generateTokens(tokens, lines); });
+
+    // for(int i = 0; i < Tokens.size(); i++) 
+    // {
+    //     cout << Tokens[i].token << endl;
+    // }
+    // nodep_t initial_node = new(node);
 }
 
 void syntacticAnalysis(vector<string> &lines)
@@ -128,7 +140,6 @@ void semanticAnalysis(vector<string> &lines)
  */
 void removeIdents(string &lines)
 {
-
     bool idents = false;
 
     if (lines[0] == ' ' && lines[1] == ' ' && lines[2] == ' ' && lines[3] == ' ')
@@ -147,4 +158,28 @@ void removeIdents(string &lines)
 
     if (idents)
         lines = "¬" + lines;
+}
+
+vector<node> generateTokens(string &lines)
+{
+    vector<node> Aux;
+
+    if (regex_match(lines, regex_tabs)) 
+    {
+        for (int i = 0; i < lines.size() - 1; i++)
+        {
+            // if (lines[i] == ' ')
+        }
+    }
+
+    else 
+    {
+        for (int i = 0; i < lines.size() - 1; i++)
+        {
+            if (lines[i] == ' ');
+        }
+    }
+    nodep_t token = new(node);
+
+    return Aux;
 }
