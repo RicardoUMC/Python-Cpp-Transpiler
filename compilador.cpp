@@ -33,7 +33,6 @@ struct node
 };
 
 typedef node *nodep_t;
-
 typedef vector<string> strvec_t;
 
 const strvec_t keywords{"False", "None", "True", "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "nonlocal", "not", "or", "pass", "raise", "return", "try", "while", "with", "yield"};
@@ -43,12 +42,12 @@ strvec_t var_names, function_names;
 void createVector(vector<string> &lines);
 void printVector(vector<string> &lines);
 
-void lexicalAnalysis(vector<string> &lines);
+void lexicalAnalysis(vector<string> &lines, vector<node> &tokens, vector<int> &identations);
 void syntacticAnalysis(vector<string> &lines);
 void semanticAnalysis(vector<string> &lines);
 
-void removeIdents(string &lines);
-vector<node> generateTokens(string &lines);
+void removeIdents(string &lines, vector<int> &identations);
+void generateTokens(string &lines);
 
 /**
  * @brief The function `createVector` takes a vector of strings as an argument and fills it with the lines of
@@ -59,9 +58,11 @@ vector<node> generateTokens(string &lines);
 int main(void)
 {
     vector<string> Lines;
+    vector<node> Tokens;
+    vector<int> Identations;
 
     createVector(Lines);
-    lexicalAnalysis(Lines);
+    lexicalAnalysis(Lines, Tokens, Identations);
 
     // printVector(Lines);
     return 0;
@@ -110,19 +111,21 @@ void createVector(vector<string> &lines)
     }
 }
 
-void lexicalAnalysis(vector<string> &lines)
+void lexicalAnalysis(vector<string> &lines, vector<node> &tokens, vector<int> &identations)
 {
-    for_each(lines.begin(), lines.end(), removeIdents);
+    // for_each(lines.begin(), lines.end(), removeIdents);
 
-    for_each(lines.begin(), lines.end(), generateTokens);
+    for (int i = 0; i < lines.size(); i++)
+    {
+        removeIdents(lines.at(i), identations);
+    }
 
-    // for_each(lines.begin(), lines.end(), [&](string d) { generateTokens(tokens, lines); });
 
-    // for(int i = 0; i < Tokens.size(); i++) 
-    // {
-    //     cout << Tokens[i].token << endl;
-    // }
-    // nodep_t initial_node = new(node);
+    /* Printing the lines of the file and the identation of each line. */
+    for (int i = 0; i < lines.size(); i++)
+    {
+        cout << lines.at(i) << ":" << identations.at(i) << endl;
+    }
 }
 
 void syntacticAnalysis(vector<string> &lines)
@@ -138,13 +141,13 @@ void semanticAnalysis(vector<string> &lines)
  *
  * @param lines The string that will be modified.
  */
-void removeIdents(string &lines)
+void removeIdents(string &lines, vector<int> &identations)
 {
-    bool idents = false;
+    int count = 0;
 
-    if (lines[0] == ' ' && lines[1] == ' ' && lines[2] == ' ' && lines[3] == ' ')
+    while (lines[0] == ' ' && lines[1] == ' ' && lines[2] == ' ' && lines[3] == ' ')
     {
-        idents = true;
+        count++;
 
         int i;
         string auxiliar = "";
@@ -152,20 +155,27 @@ void removeIdents(string &lines)
             auxiliar += lines[i];
 
         lines = auxiliar;
-
-        removeIdents(lines);
     }
 
-    if (idents)
-        lines = "¬" + lines;
+    identations.push_back(count);
+
+    while (count > 0) 
+    {
+        lines = "->" + lines;
+        count--;
+    }
 }
 
-vector<node> generateTokens(string &lines)
+void generateTokens(string &lines)
 {
-    vector<node> Aux;
-
     if (regex_match(lines, regex_tabs)) 
     {
+        if (lines[0] == ' ')
+        {
+            cout << "ERROR: Line begin with space(s)." << endl;
+            exit(-1);
+        }
+        
         for (int i = 0; i < lines.size() - 1; i++)
         {
             // if (lines[i] == ' ')
@@ -174,12 +184,16 @@ vector<node> generateTokens(string &lines)
 
     else 
     {
-        for (int i = 0; i < lines.size() - 1; i++)
+        if (lines[0] == ' ') 
         {
+            cout << "ERROR: Line begin with space(s)." << endl;
+            exit(-1);
+        }
+
+        for (int i = 0; i < lines.size() - 1; i++)
+        {   
             if (lines[i] == ' ');
         }
     }
     nodep_t token = new(node);
-
-    return Aux;
 }
