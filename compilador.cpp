@@ -29,7 +29,6 @@ struct node
     int line;
     string token;
     string type;
-    node *next;
 };
 
 typedef node *nodep_t;
@@ -42,12 +41,12 @@ strvec_t var_names, function_names;
 void createVector(vector<string> &lines);
 void printVector(vector<string> &lines);
 
-void lexicalAnalysis(vector<string> &lines, vector<node> &tokens, vector<int> &identations);
+void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int> &identations);
 void syntacticAnalysis(vector<string> &lines);
 void semanticAnalysis(vector<string> &lines);
 
 void removeIdents(string &lines, vector<int> &identations);
-void generateTokens(string &lines);
+void generateTokens(const int num_line, string &lines, vector<nodep_t> &tokens);
 
 /**
  * @brief The function `createVector` takes a vector of strings as an argument and fills it with the lines of
@@ -58,7 +57,7 @@ void generateTokens(string &lines);
 int main(void)
 {
     vector<string> Lines;
-    vector<node> Tokens;
+    vector<nodep_t> Tokens;
     vector<int> Identations;
 
     createVector(Lines);
@@ -111,20 +110,20 @@ void createVector(vector<string> &lines)
     }
 }
 
-void lexicalAnalysis(vector<string> &lines, vector<node> &tokens, vector<int> &identations)
+void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int> &identations)
 {
-    // for_each(lines.begin(), lines.end(), removeIdents);
-
-    for (int i = 0; i < lines.size(); i++)
+    int i;
+    for (i = 0; i < lines.size(); i++)
     {
         removeIdents(lines.at(i), identations);
+        generateTokens(i+1, lines.at(i), tokens);
     }
 
 
     /* Printing the lines of the file and the identation of each line. */
-    for (int i = 0; i < lines.size(); i++)
+    for (i = 0; i < tokens.size(); i++)
     {
-        cout << lines.at(i) << ":" << identations.at(i) << endl;
+        cout << "[line:" << tokens[i]->line << " token:" << tokens[i]->token << "]" << endl;
     }
 }
 
@@ -137,9 +136,10 @@ void semanticAnalysis(vector<string> &lines)
 }
 
 /**
- * @brief removeIdents removes the identation of the code recursively
- *
- * @param lines The string that will be modified.
+ * @brief It removes the identations from the code and stores them in a vector
+ * 
+ * @param lines the string that contains the code
+ * @param identations vector of ints that will store the identation level of each line.
  */
 void removeIdents(string &lines, vector<int> &identations)
 {
@@ -158,42 +158,47 @@ void removeIdents(string &lines, vector<int> &identations)
     }
 
     identations.push_back(count);
-
+    
+    /* 
     while (count > 0) 
     {
         lines = "->" + lines;
         count--;
-    }
+    } 
+    */
 }
 
-void generateTokens(string &lines)
+/**
+ * @brief It takes a line of text, and breaks it up into tokens
+ * 
+ * @param num_line The line number of the line being processed.
+ * @param lines a string that contains the line of code.
+ * @param tokens vector of tokens.
+ */
+void generateTokens(const int num_line, string &lines, vector<nodep_t> &tokens)
 {
-    if (regex_match(lines, regex_tabs)) 
+    int i;
+
+    if (lines[0] == ' ') 
     {
-        if (lines[0] == ' ')
-        {
-            cout << "ERROR: Line begin with space(s)." << endl;
-            exit(-1);
-        }
-        
-        for (int i = 0; i < lines.size() - 1; i++)
-        {
-            // if (lines[i] == ' ')
-        }
+        cout << "ERROR: Line " << num_line << " begin with space(s)." << endl;
+        exit(-1);
     }
 
-    else 
+    nodep_t token;
+    for (i = 0; i < lines.size(); i++)
     {
-        if (lines[0] == ' ') 
+        token = new(node);
+        token->line = num_line;
+        token->token = "";
+        token->type = "<undefined>";
+
+        while (lines[i] != ' ' && lines[i] != '\0')
         {
-            cout << "ERROR: Line begin with space(s)." << endl;
-            exit(-1);
+            token->token += lines[i];
+            i++;
         }
 
-        for (int i = 0; i < lines.size() - 1; i++)
-        {   
-            if (lines[i] == ' ');
-        }
+        tokens.push_back(token);
     }
-    nodep_t token = new(node);
 }
