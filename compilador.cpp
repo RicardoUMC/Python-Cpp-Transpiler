@@ -46,7 +46,7 @@ void syntacticAnalysis(vector<string> &lines);
 void semanticAnalysis(vector<string> &lines);
 
 void removeIdents(string &lines, vector<int> &identations);
-void generateTokens(const int num_line, string &lines, vector<nodep_t> &tokens);
+void generateTokens(const int num_line, string &line, vector<nodep_t> &tokens);
 
 /**
  * @brief The function `createVector` takes a vector of strings as an argument and fills it with the lines of
@@ -116,14 +116,14 @@ void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int>
     for (i = 0; i < lines.size(); i++)
     {
         removeIdents(lines.at(i), identations);
-        generateTokens(i+1, lines.at(i), tokens);
+        generateTokens(i + 1, lines.at(i), tokens);
     }
-
 
     /* Printing the lines of the file and the identation of each line. */
     for (i = 0; i < tokens.size(); i++)
     {
-        cout << "[line:" << tokens[i]->line << " token:" << tokens[i]->token << "]" << endl;
+        // if (tokens[i]->type != "<undefined>")
+        cout << "[line:" << tokens[i]->line << " token:" << tokens[i]->token << " type:" << tokens[i]->type << "]" << endl;
     }
 }
 
@@ -137,7 +137,7 @@ void semanticAnalysis(vector<string> &lines)
 
 /**
  * @brief It removes the identations from the code and stores them in a vector
- * 
+ *
  * @param lines the string that contains the code
  * @param identations vector of ints that will store the identation level of each line.
  */
@@ -150,55 +150,109 @@ void removeIdents(string &lines, vector<int> &identations)
         count++;
 
         int i;
-        string auxiliar = "";
+        string buffer = "";
         for (i = 4; i < lines.size(); i++)
-            auxiliar += lines[i];
+            buffer += lines[i];
 
-        lines = auxiliar;
+        lines = buffer;
     }
 
     identations.push_back(count);
-    
-    /* 
-    while (count > 0) 
+
+    /*
+    while (count > 0)
     {
         lines = "->" + lines;
         count--;
-    } 
+    }
     */
 }
 
 /**
  * @brief It takes a line of text, and breaks it up into tokens
- * 
+ *
  * @param num_line The line number of the line being processed.
  * @param lines a string that contains the line of code.
  * @param tokens vector of tokens.
  */
-void generateTokens(const int num_line, string &lines, vector<nodep_t> &tokens)
+void generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
 {
-    int i;
+    int i, key_i;
 
-    if (lines[0] == ' ') 
+    if (line[0] == ' ')
     {
         cout << "ERROR: Line " << num_line << " begin with space(s)." << endl;
         exit(-1);
     }
 
     nodep_t token;
-    for (i = 0; i < lines.size(); i++)
+    for (i = 0; i < line.size(); i++)
     {
-        token = new(node);
+        token = new (node);
         token->line = num_line;
-        token->token = "";
         token->type = "<undefined>";
 
-        while (lines[i] != ' ' && lines[i] != '\0')
+        string buffer = "";
+        while (line[i] != ' ' && line[i] != '\0')
         {
-            token->token += lines[i];
+            buffer += line[i];
             i++;
         }
 
-        tokens.push_back(token);
+        token->token = buffer;
+
+        for (key_i = 0; key_i < keywords.size(); key_i++)
+        {
+            if (token->token == keywords[key_i])
+            {
+                i++; // We move the iterator corresponding to the space by one
+                token->type = keywords[key_i];
+                tokens.push_back(token);
+
+                buffer = "";
+                
+                if (token->type == "def")
+                {
+                    token = new (node);
+                    token->line = num_line;
+                    token->type = "ID";
+
+                    while (line[i] != '(' && line[i] != '\0')
+                    {
+                        buffer += line[i];
+                        i++;
+                    }
+                    i--;
+
+                    token->token = buffer;
+                    tokens.push_back(token);
+                }
+
+                else if (token->type == "for")
+                {
+                    token = new (node);
+                    token->line = num_line;
+                    token->type = "ID";
+
+                    while (line[i] != ' ' && line[i] != '\0')
+                    {
+                        buffer += line[i];
+                        i++;
+                    }
+                    i--;
+
+                    token->token = buffer;
+                    tokens.push_back(token);
+                }
+
+                else 
+                {
+                    i--;
+                }
+                
+                break;
+            }
+        }
     }
+    tokens.push_back(token);
 }
