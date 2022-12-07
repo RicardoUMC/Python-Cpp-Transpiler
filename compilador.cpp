@@ -139,7 +139,7 @@ void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int>
         cout << tokens[i]->type << "<" << tokens[i]->token << "> ";
     }
 }
-//hola dios uwu
+// hola dios uwu
 void syntacticAnalysis(vector<string> &lines)
 {
 }
@@ -192,7 +192,7 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
 {
     if (line[0] == '\0')
         return -1;
-        
+
     if (line[0] == ' ')
     {
         cout << "ERROR: Line " << num_line << " begin with space(s)." << endl;
@@ -279,7 +279,7 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
                     token->type = "_FUNC_ID_";
                     token->token = buffer;
                     tokens.push_back(token);
-                    
+
                     buffer = "";
                 }
 
@@ -461,12 +461,12 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
                 tokens.push_back(token);
 
                 buffer = "";
-                
+
                 while (line[i + 1] == ' ')
                     i++;
             }
 
-            else 
+            else
             {
                 buffer += line[i++];
             }
@@ -499,19 +499,16 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             continue;
         }
 
-        token = new (node);
-        token->line = num_line;
-        token->type = "_VAR_ID_";
-        token->token = buffer;
-
         for (key_i = 0; key_i < keywords.size(); key_i++)
         {
-            if (token->token == keywords[key_i])
+            if (buffer == keywords[key_i])
             {
                 i++; // We move the iterator corresponding to the space by one
+                token = new (node);
+                token->line = num_line;
                 token->type = "_" + keywords[key_i] + "_";
+                token->token = buffer;
                 tokens.push_back(token);
-                added = true;
 
                 buffer = "";
                 if (token->type == "_for_")
@@ -547,16 +544,25 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
                         i++;
                 }
 
-                else 
+                else
                 {
                     i--;
                 }
-                
+
                 break;
             }
         }
 
-        if (!added) tokens.push_back(token);
+        if (!added)
+            tokens.push_back(token);
+        if ()
+        {
+            token = new (node);
+            token->line = num_line;
+            token->type = "_VAR_ID_";
+            token->token = buffer;
+            tokens.push_back(token);
+        }
     }
 
     return 0;
