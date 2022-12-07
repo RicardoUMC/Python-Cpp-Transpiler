@@ -46,7 +46,7 @@ void syntacticAnalysis(vector<string> &lines);
 void semanticAnalysis(vector<string> &lines);
 
 void removeIdents(string &lines, vector<int> &identations);
-void generateTokens(const int num_line, string &line, vector<nodep_t> &tokens);
+int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens);
 
 /**
  * @brief The function `createVector` takes a vector of strings as an argument and fills it with the lines of
@@ -122,9 +122,20 @@ void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int>
     /* Printing the lines of the file and the identation of each line. */
     for (i = 0; i < tokens.size(); i++)
     {
-        // if (tokens[i]->type != "<undefined>")
-        cout << "[line:" << tokens[i]->line << " token:" << tokens[i]->token << " type:" << tokens[i]->type << "]" << endl;
+        if (tokens[i]->type == "<undefined>")
+            cout << "[line:" << tokens[i]->line << " token:" << tokens[i]->token << " type:" << tokens[i]->type << "]" << endl;
     }
+
+    // int linea = 1;
+    // for (i = 0; i < tokens.size(); i++)
+    // {
+    //     if (tokens[i]->line != linea)
+    //     {
+    //         cout << endl;
+    //         linea = tokens[i]->line;
+    //     }
+    //     cout << tokens[i]->type << " ";
+    // }
 }
 
 void syntacticAnalysis(vector<string> &lines)
@@ -175,30 +186,197 @@ void removeIdents(string &lines, vector<int> &identations)
  * @param lines a string that contains the line of code.
  * @param tokens vector of tokens.
  */
-void generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
+int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
 {
-    int i, key_i;
-
+    if (line[0] == '\0')
+        return -1;
+        
     if (line[0] == ' ')
     {
         cout << "ERROR: Line " << num_line << " begin with space(s)." << endl;
-        exit(-1);
+        return -4;
     }
+
+    int i, key_i;
 
     nodep_t token;
     for (i = 0; i < line.size(); i++)
     {
+        bool added = false;
         token = new (node);
-        token->line = num_line;
         token->type = "<undefined>";
 
         string buffer = "";
         while (line[i] != ' ' && line[i] != '\0')
         {
-            buffer += line[i];
-            i++;
+            if (line[i] == ',')
+            {
+                if (buffer != "")
+                {
+                    token = new (node);
+                    token->line = num_line;
+                    token->type = "_PARAM_";
+                    token->token = buffer;
+                    tokens.push_back(token);
+
+                    buffer = "";
+                }
+
+                token = new (node);
+                token->line = num_line;
+                token->type = "_COMA_";
+                token->token = line[i++];
+                tokens.push_back(token);
+
+                while (line[i] == ' ')
+                    i++;
+            }
+
+            else if (line[i] == '(')
+            {
+                if (buffer != "")
+                {
+                    token = new (node);
+                    token->line = num_line;
+                    token->type = "_FUNC_ID_";
+                    token->token = buffer;
+                    tokens.push_back(token);
+                    
+                    buffer = "";
+                }
+
+                token = new (node);
+                token->line = num_line;
+                token->type = "_OPEN_PAR_";
+                token->token = line[i++];
+                tokens.push_back(token);
+
+                buffer = "";
+
+                while (line[i] == ' ')
+                    i++;
+            }
+
+            else if (line[i] == ')')
+            {
+                if (buffer != "")
+                {
+                    token = new (node);
+                    token->line = num_line;
+                    token->type = "_PARAM_";
+                    token->token = buffer;
+                    tokens.push_back(token);
+
+                    buffer = "";
+                }
+
+                token = new (node);
+                token->line = num_line;
+                token->type = "_CLOSE_PAR_";
+                token->token = line[i++];
+                tokens.push_back(token);
+
+                buffer = "";
+
+                while (line[i] == ' ')
+                    i++;
+            }
+
+            else if (line[i] == '=')
+            {
+                if (buffer != "")
+                {
+                    token = new (node);
+                    token->line = num_line;
+                    token->type = "_VAR_ID_";
+                    token->token = buffer;
+                    tokens.push_back(token);
+
+                    buffer = "";
+                }
+
+                token = new (node);
+                token->line = num_line;
+                token->type = "_OPERATOR_";
+                token->token = line[i++];
+                tokens.push_back(token);
+
+                buffer = "";
+
+                while (line[i] == ' ')
+                    i++;
+            }
+
+            else if (line[i] == '+' || line[i] == '-' || line[i] == '/' || line[i] == '*')
+            {
+                if (buffer != "")
+                {
+                    token = new (node);
+                    token->line = num_line;
+                    token->type = "_OPERANDING_";
+                    token->token = buffer;
+                    tokens.push_back(token);
+
+                    buffer = "";
+                }
+
+                token = new (node);
+                token->line = num_line;
+                token->type = "_OPERATOR_";
+                token->token = line[i++];
+                tokens.push_back(token);
+
+                buffer = "";
+
+                while (line[i] == ' ')
+                    i++;
+            }
+
+            else if (line[i] == ':')
+            {
+                token = new (node);
+                token->line = num_line;
+                token->type = "_NEW_BLOCK_";
+                token->token = line[i++];
+                tokens.push_back(token);
+
+                buffer = "";
+
+                while (line[i] == ' ')
+                    i++;
+            }
+
+            else if (line[i] == '"')
+            {
+                buffer += line[i++];
+                while (line[i] != '"' && line[i] != '\0')
+                    buffer += line[i++];
+                buffer += line[i++];
+
+                token = new (node);
+                token->line = num_line;
+                token->type = "_STRING_";
+                token->token = buffer;
+                tokens.push_back(token);
+
+                buffer = "";
+                
+                while (line[i + 1] == ' ')
+                    i++;
+            }
+
+            else 
+            {
+                buffer += line[i++];
+            }
         }
 
+        if (line[i] == '\0' && buffer == "")
+            return 1;
+
+        token = new (node);
+        token->line = num_line;
+        token->type = "<undefined>";
         token->token = buffer;
 
         for (key_i = 0; key_i < keywords.size(); key_i++)
@@ -206,43 +384,42 @@ void generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             if (token->token == keywords[key_i])
             {
                 i++; // We move the iterator corresponding to the space by one
-                token->type = keywords[key_i];
+                token->type = "_" + keywords[key_i] + "_";
                 tokens.push_back(token);
+                added = true;
 
                 buffer = "";
-                
-                if (token->type == "def")
+                if (token->type == "_for_")
                 {
                     token = new (node);
                     token->line = num_line;
-                    token->type = "ID";
+                    token->type = "_VAR_ID_";
 
-                    while (line[i] != '(' && line[i] != '\0')
+                    while (line[i] != ' ' && line[i] != '\0')
                     {
-                        buffer += line[i];
-                        i++;
+                        buffer += line[i++];
                     }
-                    i--;
 
                     token->token = buffer;
                     tokens.push_back(token);
                 }
 
-                else if (token->type == "for")
+                else if (token->type == "_return_")
                 {
                     token = new (node);
                     token->line = num_line;
-                    token->type = "ID";
+                    token->type = "_RETURN_VALUE_";
 
                     while (line[i] != ' ' && line[i] != '\0')
                     {
-                        buffer += line[i];
-                        i++;
+                        buffer += line[i++];
                     }
-                    i--;
 
                     token->token = buffer;
                     tokens.push_back(token);
+
+                    while (line[i + 1] == ' ')
+                        i++;
                 }
 
                 else 
@@ -253,6 +430,9 @@ void generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
                 break;
             }
         }
+
+        if (!added) tokens.push_back(token);
     }
-    tokens.push_back(token);
+
+    return 0;
 }
