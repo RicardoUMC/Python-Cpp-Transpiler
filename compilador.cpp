@@ -136,7 +136,7 @@ void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int>
             cout << endl;
             linea = tokens[i]->line;
         }
-        cout << tokens[i]->type << "<" << tokens[i]->token << "> ";
+        cout << tokens[i]->type << "<" << tokens[i]->token << " ";
     }
 }
 // hola dios uwu
@@ -510,33 +510,34 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
                 token->token = buffer;
                 tokens.push_back(token);
 
+                added = true;
                 buffer = "";
                 if (token->type == "_for_")
                 {
-                    token = new (node);
-                    token->line = num_line;
-                    token->type = "_VAR_ID_";
 
                     while (line[i] != ' ' && line[i] != '\0')
                     {
                         buffer += line[i++];
                     }
 
+                    token = new (node);
+                    token->line = num_line;
+                    token->type = "_VAR_ID_";
                     token->token = buffer;
                     tokens.push_back(token);
                 }
 
                 else if (token->type == "_return_")
                 {
-                    token = new (node);
-                    token->line = num_line;
-                    token->type = "_RETURN_VALUE_";
 
                     while (line[i] != ' ' && line[i] != '\0')
                     {
                         buffer += line[i++];
                     }
 
+                    token = new (node);
+                    token->line = num_line;
+                    token->type = "_RETURN_VALUE_";
                     token->token = buffer;
                     tokens.push_back(token);
 
@@ -554,8 +555,6 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
         }
 
         if (!added)
-            tokens.push_back(token);
-        if ()
         {
             token = new (node);
             token->line = num_line;
