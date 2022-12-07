@@ -491,13 +491,13 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
         {
             token = new (node);
             token->line = num_line;
-            token->type = "_FLOAT_"; //na mas para ser parte de tu codigo uwu uwu
+            token->type = "_FLOAT_";
             token->token = buffer;
             tokens.push_back(token);
 
             buffer = "";
             continue;
-        } //mira soy una impresion UuU // q bonita uwu
+        }
 
         token = new (node);
         token->line = num_line;
@@ -527,7 +527,7 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
 
                     token->token = buffer;
                     tokens.push_back(token);
-                } //meitrix
+                }
 
                 else if (token->type == "_return_")
                 {
