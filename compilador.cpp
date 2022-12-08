@@ -23,8 +23,8 @@ using namespace std;
 const regex regex_comment("(.*)#(.*)");
 const regex regex_idents("[\\s]{4}(.*)");
 const regex regex_tabs("¬+(.*)");
-const regex regex_int("[\\d]*");
-const regex regex_float("[\\d]*(.)[\\d]*");
+const regex regex_int("[\\d]+");
+const regex regex_float("[\\d]+(.)[\\d]+");
 
 struct node
 {
@@ -129,14 +129,16 @@ void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int>
     // }
 
     int linea = 1;
+    cout << "1 -- ";
     for (i = 0; i < tokens.size(); i++)
     {
         if (tokens[i]->line != linea)
         {
             cout << endl;
             linea = tokens[i]->line;
+            cout << linea << " -- ";
         }
-        cout << /* tokens[i]->type << "<" << */ tokens[i]->literal << " ";
+        cout << tokens[i]->type << "(" << tokens[i]->literal << ") ";
     }
 }
 // hola dios uwu
@@ -208,11 +210,16 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
         {
             if (line[i] == ',')
             {
-                if (buffer != "" && (tokens[tokens.size() - 1]->type == "_OPEN_BRACKET_" || tokens[tokens.size() - 1]->type == "_COMA_"))
-                    addToken(num_line, buffer, "_ARRAY_VALUE_", tokens);
+                if (buffer != "") 
+                {
+                    if (regex_match(buffer, regex_int))
+                        addToken(num_line, buffer, "_INT_", tokens);
 
-                if (buffer != "")
-                    addToken(num_line, buffer, "_PARAM_", tokens);
+                    else if (regex_match(buffer, regex_float))
+                        addToken(num_line, buffer, "_FLOAT_", tokens);
+
+                    else addToken(num_line, buffer, "_VAR_ID_", tokens);
+                }
 
                 buffer = line[i++];
                 addToken(num_line, buffer, "_COMA_", tokens);
@@ -248,7 +255,15 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             else if (line[i] == ')')
             {
                 if (buffer != "")
-                    addToken(num_line, buffer, "_PARAM_", tokens);
+                {
+                    if (regex_match(buffer, regex_int))
+                        addToken(num_line, buffer, "_INT_", tokens);
+
+                    else if (regex_match(buffer, regex_float))
+                        addToken(num_line, buffer, "_FLOAT_", tokens);
+
+                    else addToken(num_line, buffer, "_VAR_ID_", tokens);
+                }
 
                 buffer = line[i++];
                 addToken(num_line, buffer, "_CLOSE_PAR_", tokens);
@@ -272,7 +287,7 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             else if (line[i] == ']')
             {
                 if (buffer != "" && tokens[tokens.size() - 1]->type == "_OPEN_BRACKET_")
-                    addToken(num_line, buffer, "_POS_", tokens);
+                    addToken(num_line, buffer, "_VAR_ID_", tokens);
 
                 if (buffer != "")
                     addToken(num_line, buffer, "_ARRAY_VALUE_", tokens);
@@ -298,8 +313,16 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
 
             else if (line[i] == '+' || line[i] == '-' || line[i] == '/' || line[i] == '*')
             {
-                if (buffer != "")
-                    addToken(num_line, buffer, "_OPERANDING_", tokens);
+                if (buffer != "") 
+                {
+                    if (regex_match(buffer, regex_int))
+                        addToken(num_line, buffer, "_INT_", tokens);
+
+                    else if (regex_match(buffer, regex_float))
+                        addToken(num_line, buffer, "_FLOAT_", tokens);
+
+                    addToken(num_line, buffer, "_VAR_ID_", tokens);
+                }
 
                 buffer = line[i++];
                 addToken(num_line, buffer, "_OPERATOR_", tokens);
@@ -369,7 +392,14 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
         }
 
         if (!added)
+        {
             addToken(num_line, buffer, "_VAR_ID_", tokens);
+
+            while (line[i] == ' ')
+                i++;
+
+            i--;
+        }
     }
 
     return 0;
