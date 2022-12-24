@@ -2,7 +2,7 @@
  * @file compilador.cpp
  * @author Ricardo Uriel Mora Campos (rurimoca@gmail.com)
  * @brief Transpiler from Python code to C++ code.
- * @version 0.1
+ * @version 1.0
  * @date 2022-09-7
  *
  * @copyright Copyright (c) 2022
@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <fstream>
 #include <vector>
-#include <list>
 #include <string>
 #include <regex>
 
@@ -141,7 +140,7 @@ void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int>
         cout << tokens[i]->type << "(" << tokens[i]->literal << ") ";
     }
 }
-// hola dios uwu
+
 void syntacticAnalysis(vector<string> &lines)
 {
 }
