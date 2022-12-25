@@ -30,6 +30,7 @@ struct node
     int line;
     string literal;
     string type;
+    string valor;
 };
 
 typedef node *nodep_t;
