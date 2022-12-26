@@ -122,26 +122,7 @@ void lexicalAnalysis(vector<string> &lines, HashTable &table, vector<int> &ident
         generateTokens(i + 1, lines.at(i), table);
     }
 
-    /* Printing the lines of the file and the identation of each line. */
-    // for (i = 0; i < tokens.size(); i++)
-    // {
-    //     cout << "[line:" << tokens[i]->line << " token:" << tokens[i]->literal << " type:" << tokens[i]->type << "]" << endl;
-    // }
-
     table.printTable();
-
-    // int line = 1;
-    // cout << "1 -- ";
-    // for (i = 0; i < TABLE_SIZE; i++)
-    // {
-    //     if (*table[i]->line != line)
-    //     {
-    //         cout << endl;
-    //         line = table[i]->line;
-    //         cout << line << " -- ";
-    //     }
-    //     cout << table[i]->type << "(" << table[i]->lexem << ") ";
-    // }
 }
 
 void syntacticAnalysis(vector<string> &lines)
