@@ -9,6 +9,7 @@
  *
  */
 
+#include "hash.hpp"
 #include <iostream>
 #include <iterator>
 #include <algorithm>
@@ -43,13 +44,12 @@ strvec_t var_names, function_names;
 void createVector(vector<string> &lines);
 void printVector(vector<string> &lines);
 
-void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int> &identations);
+void lexicalAnalysis(vector<string> &lines, HashTable &table, vector<int> &identations);
 void syntacticAnalysis(vector<string> &lines);
 void semanticAnalysis(vector<string> &lines);
 
 void removeIdents(string &lines, vector<int> &identations);
-int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens);
-int addToken(const int num_line, string &token, string type, vector<nodep_t> &tokens);
+int generateTokens(const int num_line, string &line, HashTable &table);
 
 /**
  * @brief The function `createVector` takes a vector of strings as an argument and fills it with the lines of
@@ -60,11 +60,11 @@ int addToken(const int num_line, string &token, string type, vector<nodep_t> &to
 int main(void)
 {
     vector<string> Lines;
-    vector<nodep_t> Tokens;
+    HashTable table;
     vector<int> Identations;
 
     createVector(Lines);
-    lexicalAnalysis(Lines, Tokens, Identations);
+    lexicalAnalysis(Lines, table, Identations);
 
     // printVector(Lines);
     return 0;
@@ -113,13 +113,13 @@ void createVector(vector<string> &lines)
     }
 }
 
-void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int> &identations)
+void lexicalAnalysis(vector<string> &lines, HashTable &table, vector<int> &identations)
 {
     int i;
     for (i = 0; i < lines.size(); i++)
     {
         removeIdents(lines.at(i), identations);
-        generateTokens(i + 1, lines.at(i), tokens);
+        generateTokens(i + 1, lines.at(i), table);
     }
 
     /* Printing the lines of the file and the identation of each line. */
@@ -128,18 +128,20 @@ void lexicalAnalysis(vector<string> &lines, vector<nodep_t> &tokens, vector<int>
     //     cout << "[line:" << tokens[i]->line << " token:" << tokens[i]->literal << " type:" << tokens[i]->type << "]" << endl;
     // }
 
-    int linea = 1;
-    cout << "1 -- ";
-    for (i = 0; i < tokens.size(); i++)
-    {
-        if (tokens[i]->line != linea)
-        {
-            cout << endl;
-            linea = tokens[i]->line;
-            cout << linea << " -- ";
-        }
-        cout << tokens[i]->type << "(" << tokens[i]->literal << ") ";
-    }
+    table.printTable();
+
+    // int line = 1;
+    // cout << "1 -- ";
+    // for (i = 0; i < TABLE_SIZE; i++)
+    // {
+    //     if (*table[i]->line != line)
+    //     {
+    //         cout << endl;
+    //         line = table[i]->line;
+    //         cout << line << " -- ";
+    //     }
+    //     cout << table[i]->type << "(" << table[i]->lexem << ") ";
+    // }
 }
 
 void syntacticAnalysis(vector<string> &lines)
@@ -184,13 +186,13 @@ void removeIdents(string &lines, vector<int> &identations)
 }
 
 /**
- * @brief It takes a line of text, and breaks it up into tokens
+ * @brief It takes a line of text, and breaks it up into table
  *
  * @param num_line The line number of the line being processed.
  * @param lines a string that contains the line of code.
- * @param tokens vector of tokens.
+ * @param table vector of table.
  */
-int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
+int generateTokens(const int num_line, string &line, HashTable &table)
 {
     if (line[0] == '\0')
         return -1;
@@ -213,16 +215,16 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
                 if (buffer != "") 
                 {
                     if (regex_match(buffer, regex_int))
-                        addToken(num_line, buffer, "_INT_", tokens);
+                        table.insert(num_line, buffer, "_INT_");
 
                     else if (regex_match(buffer, regex_float))
-                        addToken(num_line, buffer, "_FLOAT_", tokens);
+                        table.insert(num_line, buffer, "_FLOAT_");
 
-                    else addToken(num_line, buffer, "_VAR_ID_", tokens);
+                    else table.insert(num_line, buffer, "_VAR_ID_");
                 }
 
                 buffer = line[i++];
-                addToken(num_line, buffer, "_COMA_", tokens);
+                table.insert(num_line, buffer, "_COMA_");
 
                 while (line[i] == ' ')
                     i++;
@@ -231,10 +233,10 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             else if (line[i] == '.')
             {
                 if (buffer != "")
-                    addToken(num_line, buffer, "_VAR_ID_", tokens);
+                    table.insert(num_line, buffer, "_VAR_ID_");
 
                 buffer = line[i++];
-                addToken(num_line, buffer, "_DOT_", tokens);
+                table.insert(num_line, buffer, "_DOT_");
 
                 while (line[i] == ' ')
                     i++;
@@ -243,10 +245,10 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             else if (line[i] == '(')
             {
                 if (buffer != "")
-                    addToken(num_line, buffer, "_FUNC_ID_", tokens);
+                    table.insert(num_line, buffer, "_FUNC_ID_");
 
                 buffer = line[i++];
-                addToken(num_line, buffer, "_OPEN_PAR_", tokens);
+                table.insert(num_line, buffer, "_OPEN_PAR_");
 
                 while (line[i] == ' ')
                     i++;
@@ -257,16 +259,16 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
                 if (buffer != "")
                 {
                     if (regex_match(buffer, regex_int))
-                        addToken(num_line, buffer, "_INT_", tokens);
+                        table.insert(num_line, buffer, "_INT_");
 
                     else if (regex_match(buffer, regex_float))
-                        addToken(num_line, buffer, "_FLOAT_", tokens);
+                        table.insert(num_line, buffer, "_FLOAT_");
 
-                    else addToken(num_line, buffer, "_VAR_ID_", tokens);
+                    else table.insert(num_line, buffer, "_VAR_ID_");
                 }
 
                 buffer = line[i++];
-                addToken(num_line, buffer, "_CLOSE_PAR_", tokens);
+                table.insert(num_line, buffer, "_CLOSE_PAR_");
 
                 while (line[i] == ' ')
                     i++;
@@ -275,10 +277,10 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             else if (line[i] == '[')
             {
                 if (buffer != "")
-                    addToken(num_line, buffer, "_ARRAY_ID_", tokens);
+                    table.insert(num_line, buffer, "_ARRAY_ID_");
 
                 buffer = line[i++];
-                addToken(num_line, buffer, "_OPEN_BRACKET_", tokens);
+                table.insert(num_line, buffer, "_OPEN_BRACKET_");
 
                 while (line[i] == ' ')
                     i++;
@@ -286,14 +288,14 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
 
             else if (line[i] == ']')
             {
-                if (buffer != "" && tokens[tokens.size() - 1]->type == "_OPEN_BRACKET_")
-                    addToken(num_line, buffer, "_VAR_ID_", tokens);
+                if (buffer != "" && table.search("["))
+                    table.insert(num_line, buffer, "_VAR_ID_");
 
                 if (buffer != "")
-                    addToken(num_line, buffer, "_ARRAY_VALUE_", tokens);
+                    table.insert(num_line, buffer, "_ARRAY_VALUE_");
 
                 buffer = line[i++];
-                addToken(num_line, buffer, "_CLOSE_BRACKET_", tokens);
+                table.insert(num_line, buffer, "_CLOSE_BRACKET_");
 
                 while (line[i] == ' ')
                     i++;
@@ -302,10 +304,10 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             else if (line[i] == '=')
             {
                 if (buffer != "")
-                    addToken(num_line, buffer, "_VAR_ID_", tokens);
+                    table.insert(num_line, buffer, "_VAR_ID_");
 
                 buffer = line[i++];
-                addToken(num_line, buffer, "_OPERATOR_", tokens);
+                table.insert(num_line, buffer, "_OPERATOR_");
 
                 while (line[i] == ' ')
                     i++;
@@ -316,16 +318,16 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
                 if (buffer != "") 
                 {
                     if (regex_match(buffer, regex_int))
-                        addToken(num_line, buffer, "_INT_", tokens);
+                        table.insert(num_line, buffer, "_INT_");
 
                     else if (regex_match(buffer, regex_float))
-                        addToken(num_line, buffer, "_FLOAT_", tokens);
+                        table.insert(num_line, buffer, "_FLOAT_");
 
-                    addToken(num_line, buffer, "_VAR_ID_", tokens);
+                    table.insert(num_line, buffer, "_VAR_ID_");
                 }
 
                 buffer = line[i++];
-                addToken(num_line, buffer, "_OPERATOR_", tokens);
+                table.insert(num_line, buffer, "_OPERATOR_");
 
                 while (line[i] == ' ')
                     i++;
@@ -334,7 +336,7 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             else if (line[i] == ':')
             {
                 buffer = line[i++];
-                addToken(num_line, buffer, "_NEW_BLOCK_", tokens);
+                table.insert(num_line, buffer, "_NEW_BLOCK_");
 
                 while (line[i] == ' ')
                     i++;
@@ -349,13 +351,13 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
                 if (line[i] != '\0')
                     buffer += line[i++];
 
-                addToken(num_line, buffer, "_STRING_", tokens);
+                table.insert(num_line, buffer, "_STRING_");
 
                 while (line[i] == ' ')
                     i++;
             }
 
-            else
+            else 
                 buffer += line[i++];
         }
 
@@ -364,13 +366,13 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
 
         if (regex_match(buffer, regex_int))
         {
-            addToken(num_line, buffer, "_INT_", tokens);
+            table.insert(num_line, buffer, "_INT_");
             continue;
         }
 
         else if (regex_match(buffer, regex_float))
         {
-            addToken(num_line, buffer, "_FLOAT_", tokens);
+            table.insert(num_line, buffer, "_FLOAT_");
             continue;
         }
 
@@ -380,7 +382,7 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
             if (buffer == keywords[key_i])
             {
                 string type = "_" + keywords[key_i] + "_";
-                addToken(num_line, buffer, type, tokens);
+                table.insert(num_line, buffer, type);
                 added = true;
 
                 while (line[i] == ' ')
@@ -393,7 +395,7 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
 
         if (!added)
         {
-            addToken(num_line, buffer, "_VAR_ID_", tokens);
+            table.insert(num_line, buffer, "_VAR_ID_");
 
             while (line[i] == ' ')
                 i++;
@@ -405,15 +407,3 @@ int generateTokens(const int num_line, string &line, vector<nodep_t> &tokens)
     return 0;
 }
 
-int addToken(const int num_line, string &token, string type, vector<nodep_t> &tokens)
-{
-    nodep_t aux_token;
-    aux_token = new (node);
-    aux_token->line = num_line;
-    aux_token->type = type;
-    aux_token->literal = token;
-    tokens.push_back(aux_token);
-    token = "";
-
-    return 0;
-}
